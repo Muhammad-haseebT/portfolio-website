@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --color-primary: #0F172A; /* Slate 900 */
+  --color-secondary: #334155; /* Slate 700 */
+  --color-accent: #38BDF8; /* Sky 400 */
+  --color-accent-hover: #0284C7; /* Sky 600 */
+  --color-background: #F8FAFC; /* Slate 50 */
+  --color-surface: #FFFFFF;
+  --color-text-main: #0F172A;
+  --color-text-muted: #64748B; /* Slate 500 */
+  
+  --color-dark-bg: #0B1120;
+  --color-dark-surface: #1E293B;
+  --color-dark-text: #F8FAFC;
+  --color-dark-muted: #94A3B8;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-main);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Dark mode overrides (assume dark by default or toggleable, let's make it dark mode default for that sleek look) */
+  body {
+    background-color: var(--color-dark-bg);
+    color: var(--color-dark-text);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .glass-card {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+}
