@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Space Grotesk", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-display: "Outfit", system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
 
-  --color-primary: #0F172A; /* Slate 900 */
-  --color-secondary: #334155; /* Slate 700 */
-  --color-accent: #38BDF8; /* Sky 400 */
-  --color-accent-hover: #0284C7; /* Sky 600 */
-  --color-background: #F8FAFC; /* Slate 50 */
-  --color-surface: #FFFFFF;
-  --color-text-main: #0F172A;
-  --color-text-muted: #64748B; /* Slate 500 */
+  --color-primary: #08080C; /* Obsidian Black */
+  --color-secondary: #0F172A; /* Slate 900 */
+  --color-accent: #10B981; /* Emerald 500 */
+  --color-accent-hover: #34D399; /* Emerald 400 */
+  --color-accent-violet: #8B5CF6; /* Cyber Violet */
+  --color-background: #08080C;
+  --color-surface: #0E0E14;
+  --color-text-main: #E2E8F0; /* Slate 200 */
+  --color-text-muted: #94A3B8; /* Slate 400 */
   
-  --color-dark-bg: #0B1120;
-  --color-dark-surface: #1E293B;
+  --color-dark-bg: #08080C;
+  --color-dark-surface: #0E0E14;
   --color-dark-text: #F8FAFC;
   --color-dark-muted: #94A3B8;
 }
@@ -22,26 +23,37 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    background-color: #08080C;
   }
   
   body {
-    background-color: var(--color-background);
-    color: var(--color-text-main);
+    background-color: #08080C;
+    color: #F8FAFC;
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* Dark mode overrides (assume dark by default or toggleable, let's make it dark mode default for that sleek look) */
-  body {
-    background-color: var(--color-dark-bg);
-    color: var(--color-dark-text);
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     font-weight: 700;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
+  }
+
+  /* Premium glowing scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #08080C;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.2);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.4);
   }
 }
 
@@ -49,10 +61,25 @@
   .text-balance {
     text-wrap: balance;
   }
+  
   .glass-card {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(14, 14, 20, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  
+  .glass-card-hover {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .glass-card-hover:hover {
+    background: rgba(20, 20, 30, 0.8);
+    border-color: rgba(16, 185, 129, 0.2);
+    box-shadow: 0 12px 40px -10px rgba(16, 185, 129, 0.1);
+    transform: translateY(-4px);
+  }
+
+  .text-glow-emerald {
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
   }
 }

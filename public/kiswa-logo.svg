@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Metallic gold gradient matching the Kiswa Essentials palette (#c9b89a) -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5e6c8" />
+      <stop offset="35%" stop-color="#d4af37" />
+      <stop offset="70%" stop-color="#c9b89a" />
+      <stop offset="100%" stop-color="#8a795d" />
+    </linearGradient>
+    <!-- Subtle drop shadow for premium calligraphic depth -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  
+  <!-- Outer smooth dark circle representing premium brand alignment -->
+  <circle cx="256" cy="256" r="240" fill="#0f0f0f" stroke="url(#goldGrad)" stroke-width="6" />
+  
+  <!-- Inner delicate ring -->
+  <circle cx="256" cy="256" r="220" fill="none" stroke="url(#goldGrad)" stroke-width="2" stroke-dasharray="8 6" opacity="0.6" />
+  
+  <!-- Beautiful Serif letter K with classic calligraphic styling -->
+  <g filter="url(#shadow)">
+    <!-- Classic serif 'K' drawn with precise vector paths for maximum elegance -->
+    <path d="M190 140 
+             C190 132, 196 130, 206 130 
+             L236 130 
+             C246 130, 252 132, 252 140 
+             L252 372 
+             C252 380, 246 382, 236 382 
+             L206 382 
+             C196 382, 190 380, 190 372 
+             Z" 
+          fill="url(#goldGrad)" />
+          
+    <path d="M252 260 
+             L310 190 
+             C325 172, 320 165, 300 165 
+             L285 165 
+             C275 165, 270 160, 275 150 
+             L280 140 
+             C282 133, 290 130, 305 130 
+             L370 130 
+             C385 130, 392 135, 385 148 
+             L312 245 
+             L390 358 
+             C398 370, 395 382, 380 382 
+             L325 382 
+             C312 382, 305 378, 298 368 
+             L252 300 
+             Z" 
+          fill="url(#goldGrad)" />
+  </g>
+</svg>
