@@ -2,13 +2,11 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
-  ExternalLink,
   Code2,
   Database,
   LayoutTemplate,
   Layers,
   ChevronRight,
-  Briefcase,
   GraduationCap,
   Menu,
   X,
@@ -75,7 +73,7 @@ const projects = [
     link: "https://github.com/Muhammad-haseebT/Employee-Management-System",
     liveLink: null,
     gradient: "from-[#2c131d] to-[#08080c]",
-    icon: <Briefcase className="w-6 h-6 text-emerald-400" />,
+    icon: <Layers className="w-6 h-6 text-emerald-400" />,
   },
   {
     title: "Airline Booking System",
@@ -86,7 +84,7 @@ const projects = [
     link: "https://github.com/Muhammad-haseebT/Airline-sSystem-with-databse",
     liveLink: null,
     gradient: "from-[#0d2a22] to-[#08080c]",
-    icon: <ExternalLink className="w-6 h-6 text-emerald-400" />,
+    icon: <Code2 className="w-6 h-6 text-emerald-400" />,
   },
   {
     title: "Interactive Web Games Suite",
@@ -142,17 +140,9 @@ const timeline = [
     type: "education",
     title: "Bachelor of Science in Computer Science",
     subtitle: "BIIT (Barani Institute of Information Technology)",
-    date: "2020 - 2024",
+    date: "2022 - 2026",
     description:
-      "Graduated with a strong foundation in Data Structures, Algorithms, Object-Oriented Programming, Database Systems, and Web Engineering.",
-  },
-  {
-    type: "experience",
-    title: "Full Stack Developer",
-    subtitle: "Freelance & Open Source",
-    date: "2022 - Present",
-    description:
-      "Architected and developed comprehensive e-commerce platforms, real-time sports scoring applications, and desktop management systems.",
+      "Currently pursuing a strong foundation in Web Development, Backend Development, Database Systems, and Software Engineering.",
   },
 ];
 
@@ -293,11 +283,11 @@ function App() {
         <div className="absolute bottom-[20%] left-[-10%] w-[45%] h-[45%] bg-emerald-500/5 rounded-full blur-[140px]"></div>
       </div>
 
-      <main className="w-full px-8 md:px-16 xl:px-24 pt-8 pb-20">
+      <main className="w-full px-8 md:px-16 xl:px-24 pb-20">
         {/* Hero Section */}
         <section
           id="about"
-          className="pt-10 md:pt-16 pb-16 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 lg:gap-16"
+          className="pt-24 md:pt-20 lg:pt-16 pb-16 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 lg:gap-16"
         >
           <motion.div
             initial="hidden"
@@ -399,7 +389,7 @@ function App() {
                     e.currentTarget.style.display = "none";
                   }}
                 />
-                
+
                 {/* Micro hover card */}
                 <div className="absolute bottom-5 left-5 right-5 bg-slate-950/85 backdrop-blur-md rounded-2xl p-4 border border-white/5 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-3 group-hover:translate-y-0 z-30 text-center shadow-2xl">
                   <p className="text-sm font-extrabold text-white tracking-wide">
@@ -413,7 +403,9 @@ function App() {
                 <span className="absolute text-slate-500 font-medium text-xs text-center px-6">
                   Please place your image at
                   <br />
-                  <code className="text-emerald-400 mt-1 block">public/profile.jpeg</code>
+                  <code className="text-emerald-400 mt-1 block">
+                    public/profile.jpeg
+                  </code>
                 </span>
               </div>
             </div>
@@ -434,7 +426,8 @@ function App() {
                 Featured Projects
               </h2>
               <p className="text-slate-400 text-base sm:text-lg max-w-xl leading-relaxed">
-                A highly refined selection of complex, production-ready software systems I have designed and engineered.
+                A highly refined selection of complex, production-ready software
+                systems I have designed and engineered.
               </p>
             </div>
           </motion.div>
@@ -517,20 +510,26 @@ function App() {
                         href={project.liveLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex-1 text-center bg-emerald-500 text-[#08080C] px-4 py-3.5 rounded-xl font-bold text-xs hover:bg-emerald-400 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/10"
+                        /* If no GitHub button shown, take full width */
+                        className={`text-center bg-emerald-500 text-[#08080C] px-4 py-3.5 rounded-xl font-bold text-xs hover:bg-emerald-400 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/10 ${
+                          idx === 0 ? "w-full" : "flex-1"
+                        }`}
                       >
                         Live Site
                       </a>
                     )}
-                    <a
-                      href={project.link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`flex-1 flex items-center justify-center space-x-2 bg-[#12121A] text-slate-200 px-4 py-3.5 rounded-xl font-bold text-xs hover:bg-[#1A1A26] border border-white/5 hover:border-emerald-500/20 active:scale-95 transition-all`}
-                    >
-                      <FaGithub className="w-4 h-4" />
-                      <span>{project.liveLink ? "Code" : "Repository"}</span>
-                    </a>
+                    {/* Only show GitHub button if the project has a public repo (not confidential) */}
+                    {project.link && idx !== 0 && (
+                      <a
+                        href={project.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 flex items-center justify-center space-x-2 bg-[#12121A] text-slate-200 px-4 py-3.5 rounded-xl font-bold text-xs hover:bg-[#1A1A26] border border-white/5 hover:border-emerald-500/20 active:scale-95 transition-all"
+                      >
+                        <FaGithub className="w-4 h-4" />
+                        <span>{project.liveLink ? "Code" : "Repository"}</span>
+                      </a>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -621,7 +620,7 @@ function App() {
                   My Journey
                 </h2>
                 <p className="text-slate-400 font-medium">
-                  Refined professional background and scholastic milestones.
+                  My academic foundation and the path that shaped my skills.
                 </p>
               </motion.div>
 
@@ -735,7 +734,9 @@ function App() {
               </span>
             </h2>
             <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto mb-12 relative z-10 leading-relaxed font-medium">
-              I'm always excited to tackle complex technical challenges, collaborate on meaningful projects, or help scale systems. Drop me a line, and let's start coding!
+              I'm always excited to tackle complex technical challenges,
+              collaborate on meaningful projects, or help scale systems. Drop me
+              a line, and let's start coding!
             </p>
             <a
               href="mailto:mht34579@gmail.com"
