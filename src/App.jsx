@@ -287,7 +287,7 @@ function App() {
         {/* Hero Section */}
         <section
           id="about"
-          className="pt-24 md:pt-20 lg:pt-16 pb-16 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 lg:gap-16"
+          className="pt-28 md:pt-28 lg:pt-28 pb-16 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 lg:gap-16"
         >
           <motion.div
             initial="hidden"
