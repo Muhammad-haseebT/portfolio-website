@@ -1,70 +1,107 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  motion,
-  AnimatePresence,
-  useScroll,
-  useSpring,
-  useInView,
-} from "framer-motion";
-import { ArrowUpRight, Menu, X, Mail } from "lucide-react";
+  Mail,
+  Code2,
+  Database,
+  LayoutTemplate,
+  Layers,
+  ChevronRight,
+  Menu,
+  X,
+} from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
+import ParticleBackground from "./ParticleBackground";
 
-// ─── DATA ───────────────────────────────────────────────────────────────────
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
 const projects = [
   {
-    index: "01",
     title: "Kiswa Essentials",
     category: "Full-Stack E-Commerce",
-    year: "2024",
-    link: "https://kiswa-essentials.vercel.app/",
-    live: true,
+    description:
+      "A comprehensive full-stack e-commerce platform handling end-to-end user flows, secure checkout, and dynamic inventory management.",
+    tech: ["React 19", "Node.js", "Express", "PostgreSQL", "Prisma", "Stripe"],
+    link: "https://github.com/Muhammad-haseebT/kiswa-essentials",
+    liveLink: "https://kiswa-essentials.vercel.app/",
+    gradient: "from-[#1c140d] to-[#08080c]",
+    fullLogo: "/kiswa-logo.svg",
+    icon: <LayoutTemplate className="w-6 h-6 text-emerald-400" />,
   },
   {
-    index: "02",
     title: "Live Sports Scoring Platform",
     category: "Real-Time Systems",
-    year: "2024",
-    link: "https://frontend-copy-virid.vercel.app/home",
-    live: true,
+    description:
+      "High-performance live scoring application featuring real-time data streaming via WebSockets and optimized media handling.",
+    tech: ["Java Spring Boot", "React", "WebSockets", "PostgreSQL", "ImageKit"],
+    link: "https://github.com/Muhammad-haseebT/backend-copy",
+    liveLink: "https://frontend-copy-virid.vercel.app/home",
+    gradient: "from-[#0e1726] to-[#08080c]",
+    fullLogo: "/logo.png",
+    icon: <Database className="w-6 h-6 text-emerald-400" />,
   },
   {
-    index: "03",
     title: "Billing & Inventory Management",
     category: "Enterprise Desktop",
-    year: "2023",
+    description:
+      "Robust desktop software engineered to manage high-volume transactional data, track inventory adjustments, and process billing workflows.",
+    tech: ["C#", ".NET", "Desktop Architecture"],
     link: "https://github.com/Muhammad-haseebT/billing-inventory-management-software",
-    live: false,
+    liveLink: null,
+    gradient: "from-[#2d1b4e] to-[#08080c]",
+    icon: <Layers className="w-6 h-6 text-emerald-400" />,
   },
   {
-    index: "04",
     title: "Employee Management System",
     category: "Internal Tooling",
-    year: "2023",
+    description:
+      "An internal organizational tool for tracking personnel data, assigning roles, and managing hierarchical employee structures effectively.",
+    tech: ["C#", ".NET", "Desktop App", "SQL"],
     link: "https://github.com/Muhammad-haseebT/Employee-Management-System",
-    live: false,
+    liveLink: null,
+    gradient: "from-[#2c131d] to-[#08080c]",
+    icon: <Layers className="w-6 h-6 text-emerald-400" />,
   },
   {
-    index: "05",
     title: "Airline Booking System",
     category: "Java Desktop App",
-    year: "2022",
+    description:
+      "A Java-based desktop application utilizing object-oriented programming to handle flight reservations, passenger data, and database connections.",
+    tech: ["Java", "OOP", "Relational Database"],
     link: "https://github.com/Muhammad-haseebT/Airline-sSystem-with-databse",
-    live: false,
+    liveLink: null,
+    gradient: "from-[#0d2a22] to-[#08080c]",
+    icon: <Code2 className="w-6 h-6 text-emerald-400" />,
   },
   {
-    index: "06",
     title: "Interactive Web Games Suite",
-    category: "HTML5 / DOM",
-    year: "2022",
+    category: "HTML5 / DOM Games",
+    description:
+      "A collection of engaging, retro-style browser games featuring custom animations, interactive state loops, and polished CSS layouts.",
+    tech: ["JavaScript", "HTML5", "CSS3", "DOM Manipulation"],
     link: "https://github.com/Muhammad-haseebT/Tic-Tack-Toe",
-    live: false,
+    liveLink: null,
+    gradient: "from-[#112233] to-[#08080c]",
+    icon: <Code2 className="w-6 h-6 text-emerald-400" />,
   },
 ];
 
-const skillGroups = [
+const skillCategories = [
   {
-    name: "Frontend",
+    title: "Frontend Development",
     skills: [
       "JavaScript",
       "TypeScript",
@@ -75,7 +112,7 @@ const skillGroups = [
     ],
   },
   {
-    name: "Backend",
+    title: "Backend Development",
     skills: [
       "Node.js",
       "Express.js",
@@ -87,1406 +124,621 @@ const skillGroups = [
     ],
   },
   {
-    name: "Database & Tools",
+    title: "Database & Tools",
     skills: ["PostgreSQL", "Prisma ORM", "SQL", "Git/GitHub", "Stripe API"],
   },
 ];
 
-const MARQUEE_TEXT =
-  "FULL STACK ENGINEER · REACT · SPRING BOOT · WEBSOCKETS · POSTGRESQL · AVAILABLE FOR WORK · ";
-
-// ─── CUSTOM CURSOR ───────────────────────────────────────────────────────────
-
-function CustomCursor() {
-  const dot = useRef(null);
-  const ring = useRef(null);
-  const mousePos = useRef({ x: -100, y: -100 });
-  const ringPos = useRef({ x: -100, y: -100 });
-  const rafId = useRef(null);
-  const [hovered, setHovered] = useState(false);
-
-  useEffect(() => {
-    const onMove = (e) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-    };
-    const onEnter = () => setHovered(true);
-    const onLeave = () => setHovered(false);
-
-    window.addEventListener("mousemove", onMove);
-
-    const links = document.querySelectorAll("a, button");
-    links.forEach((el) => {
-      el.addEventListener("mouseenter", onEnter);
-      el.addEventListener("mouseleave", onLeave);
-    });
-
-    const animate = () => {
-      if (dot.current) {
-        dot.current.style.left = mousePos.current.x + "px";
-        dot.current.style.top = mousePos.current.y + "px";
-      }
-      if (ring.current) {
-        ringPos.current.x += (mousePos.current.x - ringPos.current.x) * 0.12;
-        ringPos.current.y += (mousePos.current.y - ringPos.current.y) * 0.12;
-        ring.current.style.left = ringPos.current.x + "px";
-        ring.current.style.top = ringPos.current.y + "px";
-      }
-      rafId.current = requestAnimationFrame(animate);
-    };
-    rafId.current = requestAnimationFrame(animate);
-
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      cancelAnimationFrame(rafId.current);
-    };
-  }, []);
-
-  return (
-    <>
-      <div ref={dot} className={`cursor-dot${hovered ? " hovered" : ""}`} />
-      <div ref={ring} className={`cursor-ring${hovered ? " hovered" : ""}`} />
-    </>
-  );
-}
-
-// ─── PAGE LOADER ─────────────────────────────────────────────────────────────
-
-function Loader({ onDone }) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let current = 0;
-    const target = 100;
-    const duration = 1400;
-    const start = performance.now();
-
-    const tick = (now) => {
-      const progress = Math.min((now - start) / duration, 1);
-      const eased =
-        progress < 0.5
-          ? 2 * progress * progress
-          : -1 + (4 - 2 * progress) * progress;
-      current = Math.round(eased * target);
-      setCount(current);
-      if (progress < 1) {
-        requestAnimationFrame(tick);
-      } else {
-        setTimeout(onDone, 120);
-      }
-    };
-    requestAnimationFrame(tick);
-  }, [onDone]);
-
-  return (
-    <motion.div
-      className="loader"
-      exit={{ y: "-100%" }}
-      transition={{ duration: 0.72, ease: [0.76, 0, 0.24, 1] }}
-    >
-      <span className="loader-count">{String(count).padStart(2, "0")}</span>
-    </motion.div>
-  );
-}
-
-// ─── SCROLL PROGRESS ─────────────────────────────────────────────────────────
-
-function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 400, damping: 40 });
-  return (
-    <motion.div className="scroll-progress" style={{ scaleX, width: "100%" }} />
-  );
-}
-
-// ─── GRAIN OVERLAY ───────────────────────────────────────────────────────────
-
-function GrainOverlay() {
-  return <div className="grain-overlay" aria-hidden="true" />;
-}
-
-// ─── HERO WORD REVEAL ────────────────────────────────────────────────────────
-
-function WordReveal({ text, delay = 0 }) {
-  const words = text.split(" ");
-  return (
-    <>
-      {words.map((word, i) => (
-        <span
-          key={i}
-          style={{
-            display: "inline-block",
-            overflow: "hidden",
-            marginRight: "0.25em",
-          }}
-        >
-          <motion.span
-            style={{ display: "inline-block" }}
-            initial={{ clipPath: "inset(0 100% 0 0)" }}
-            animate={{ clipPath: "inset(0 0% 0 0)" }}
-            transition={{
-              duration: 0.7,
-              ease: [0.76, 0, 0.24, 1],
-              delay: delay + i * 0.08,
-            }}
-          >
-            {word}
-          </motion.span>
-        </span>
-      ))}
-    </>
-  );
-}
-
-// ─── SECTION HEADING REVEAL ──────────────────────────────────────────────────
-
-function RevealHeading({
-  children,
-  as: Tag = "h2",
-  className = "",
-  delay = 0,
-}) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-
-  return (
-    <div ref={ref} className="reveal-wrapper">
-      <Tag className={className}>
-        <motion.span
-          style={{ display: "block" }}
-          initial={{ y: "105%" }}
-          animate={inView ? { y: "0%" } : {}}
-          transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1], delay }}
-        >
-          {children}
-        </motion.span>
-      </Tag>
-    </div>
-  );
-}
-
-// ─── MARQUEE STRIP ───────────────────────────────────────────────────────────
-
-function MarqueeStrip() {
-  const repeated = MARQUEE_TEXT.repeat(3);
-  return (
-    <div className="marquee-wrapper">
-      <div className="marquee-track">
-        {[...Array(3)].map((_, i) => (
-          <span key={i} className="marquee-text">
-            {repeated}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── PROJECT ROW ─────────────────────────────────────────────────────────────
-
-function ProjectRow({ project, rowIndex }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <motion.a
-      ref={ref}
-      href={project.link}
-      target="_blank"
-      rel="noreferrer"
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{
-        duration: 0.55,
-        ease: [0.33, 1, 0.68, 1],
-        delay: rowIndex * 0.05,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "24px",
-        padding: "24px 0",
-        borderBottom: "1px solid var(--border)",
-        textDecoration: "none",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Hover bg reveal */}
-      <motion.div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(212, 240, 160, 0.06)",
-          originX: 0,
-        }}
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: hovered ? 1 : 0 }}
-        transition={{ duration: 0.4, ease: [0.33, 1, 0.68, 1] }}
-      />
-
-      {/* Index */}
-      <motion.span
-        animate={{ x: hovered ? -8 : 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: "12px",
-          color: "var(--muted)",
-          minWidth: "28px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {project.index}
-      </motion.span>
-
-      {/* Title + live indicator */}
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            fontSize: "clamp(16px, 2.2vw, 24px)",
-            color: "var(--text)",
-            letterSpacing: "-0.01em",
-            transition: "color 0.3s",
-          }}
-        >
-          {project.title}
-        </span>
-        {project.live && (
-          <span
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              fontFamily: "var(--font-mono)",
-              fontSize: "9px",
-              letterSpacing: "0.1em",
-              color: "var(--accent)",
-              textTransform: "uppercase",
-            }}
-          >
-            <span className="live-dot" /> LIVE
-          </span>
-        )}
-      </div>
-
-      {/* Category */}
-      <span
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: "11px",
-          color: "var(--muted)",
-          border: "1px solid var(--border)",
-          padding: "4px 10px",
-          borderRadius: "999px",
-          whiteSpace: "nowrap",
-          position: "relative",
-          zIndex: 1,
-          display: window.innerWidth < 640 ? "none" : "block",
-        }}
-      >
-        {project.category}
-      </span>
-
-      {/* Year */}
-      <span
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: "12px",
-          color: "var(--muted)",
-          minWidth: "36px",
-          textAlign: "right",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {project.year}
-      </span>
-
-      {/* Arrow */}
-      <motion.div
-        animate={{ rotate: hovered ? -45 : 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        style={{
-          color: hovered ? "var(--accent)" : "var(--muted)",
-          transition: "color 0.3s",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <ArrowUpRight size={18} />
-      </motion.div>
-    </motion.a>
-  );
-}
-
-// ─── SKILL TAG ───────────────────────────────────────────────────────────────
-
-function SkillTag({ skill, index }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-20px" });
-
-  return (
-    <motion.span
-      ref={ref}
-      initial={{ opacity: 0, y: 10 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-        delay: index * 0.03,
-      }}
-      style={{
-        fontFamily: "var(--font-mono)",
-        fontSize: "12px",
-        color: "var(--text)",
-        border: "1px solid var(--border)",
-        padding: "6px 14px",
-        borderRadius: "999px",
-        display: "inline-block",
-        cursor: "default",
-        transition: "border-color 0.25s, color 0.25s",
-      }}
-      whileHover={{ borderColor: "var(--accent)", color: "var(--accent)" }}
-    >
-      {skill}
-    </motion.span>
-  );
-}
-
-// ─── NAV ─────────────────────────────────────────────────────────────────────
-
-function Nav({ scrolled }) {
-  const [open, setOpen] = useState(false);
-
-  const linkStyle = {
-    fontFamily: "var(--font-mono)",
-    fontSize: "11px",
-    letterSpacing: "0.1em",
-    textTransform: "uppercase",
-    color: "var(--muted)",
-    textDecoration: "none",
-    transition: "color 0.2s",
-  };
-
-  return (
-    <nav
-      style={{
-        position: "fixed",
-        top: 0,
-        width: "100%",
-        zIndex: 1000,
-        padding: "20px 40px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        background: scrolled ? "rgba(8,8,8,0.92)" : "transparent",
-        backdropFilter: scrolled ? "blur(16px)" : "none",
-        borderBottom: scrolled ? "1px solid var(--border)" : "none",
-        transition: "background 0.4s, backdrop-filter 0.4s, border 0.4s",
-        boxSizing: "border-box",
-      }}
-    >
-      {/* Logo */}
-      <a
-        href="#"
-        style={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 800,
-          fontSize: "18px",
-          color: "var(--text)",
-          textDecoration: "none",
-          letterSpacing: "-0.02em",
-        }}
-      >
-        MHT.
-      </a>
-
-      {/* Desktop links */}
-      <div
-        style={{
-          display: "flex",
-          gap: "36px",
-          alignItems: "center",
-        }}
-        className="nav-desktop"
-      >
-        {["About", "Work", "Contact"].map((item) => (
-          <a
-            key={item}
-            href={`#${item === "About" ? "about" : item === "Work" ? "projects" : "contact"}`}
-            style={linkStyle}
-            onMouseEnter={(e) => (e.target.style.color = "var(--text)")}
-            onMouseLeave={(e) => (e.target.style.color = "var(--muted)")}
-          >
-            {item}
-          </a>
-        ))}
-        <a
-          href="/resume.pdf"
-          download
-          style={{ ...linkStyle, marginLeft: "8px" }}
-          onMouseEnter={(e) => (e.target.style.color = "var(--accent)")}
-          onMouseLeave={(e) => (e.target.style.color = "var(--muted)")}
-        >
-          Resume ↓
-        </a>
-      </div>
-
-      {/* Mobile hamburger */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="nav-mobile-btn"
-        style={{
-          background: "none",
-          border: "none",
-          color: "var(--text)",
-          padding: "4px",
-        }}
-      >
-        {open ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
-      {/* Mobile drawer */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25 }}
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              right: 0,
-              background: "var(--bg)",
-              borderBottom: "1px solid var(--border)",
-              padding: "24px 40px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
-            }}
-          >
-            {["About", "Work", "Contact"].map((item) => (
-              <a
-                key={item}
-                href={`#${item === "About" ? "about" : item === "Work" ? "projects" : "contact"}`}
-                onClick={() => setOpen(false)}
-                style={{ ...linkStyle, fontSize: "14px", color: "var(--text)" }}
-              >
-                {item}
-              </a>
-            ))}
-            <a
-              href="/resume.pdf"
-              download
-              style={{ ...linkStyle, fontSize: "14px", color: "var(--muted)" }}
-            >
-              Resume ↓
-            </a>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <style>{`
-        .nav-desktop { display: flex; }
-        .nav-mobile-btn { display: none; }
-        @media (max-width: 768px) {
-          .nav-desktop { display: none !important; }
-          .nav-mobile-btn { display: flex !important; }
-        }
-      `}</style>
-    </nav>
-  );
-}
-
-// ─── APP ─────────────────────────────────────────────────────────────────────
-
-export default function App() {
-  const [loaded, setLoaded] = useState(false);
+function App() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const sectionLabel = {
-    fontFamily: "var(--font-mono)",
-    fontSize: "11px",
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    color: "var(--muted)",
-    marginBottom: "80px",
-    display: "block",
-  };
-
-  const containerStyle = {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "0 40px",
-  };
-
   return (
-    <>
-      <GrainOverlay />
-      <ScrollProgress />
-      <CustomCursor />
-
-      <AnimatePresence>
-        {!loaded && <Loader key="loader" onDone={() => setLoaded(true)} />}
-      </AnimatePresence>
-
-      {loaded && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4 }}
-        >
-          <Nav scrolled={scrolled} />
-
-          {/* ── HERO ─────────────────────────────────────────────────── */}
-          <section
-            id="about"
-            style={{
-              minHeight: "100vh",
-              display: "flex",
-              alignItems: "center",
-              padding: "140px 40px 80px",
-              maxWidth: "1200px",
-              margin: "0 auto",
-              position: "relative",
-              gap: "60px",
-            }}
+    <div className="min-h-screen bg-[#08080C] text-slate-200 selection:bg-emerald-500/30 font-body relative overflow-x-hidden">
+      <nav
+        className={`fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/[0.04] bg-[#08080C]/80 backdrop-blur-md ${
+          scrolled ? "py-4 shadow-lg shadow-black/10" : "py-5"
+        }`}
+      >
+        <div className="w-full px-8 md:px-16 xl:px-24 flex items-center justify-between">
+          <a
+            href="#about"
+            className="text-xl font-display font-extrabold text-white tracking-tight flex items-center gap-0.5"
           >
-            {/* LEFT — all text content */}
-            <div style={{ flex: "1 1 0", minWidth: 0 }}>
-              {/* Index label */}
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "11px",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  color: "var(--muted)",
-                  marginBottom: "40px",
-                  display: "block",
-                }}
-              >
-                00 — INTRO
-              </motion.span>
+            <span>MHT</span>
+            <span className="text-emerald-500">.</span>
+          </a>
 
-              {/* Giant headline */}
-              <h1
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 800,
-                  fontSize: "clamp(44px, 6vw, 88px)",
-                  lineHeight: 1.0,
-                  letterSpacing: "-0.03em",
-                  color: "var(--text)",
-                  marginBottom: "48px",
-                }}
-              >
-                <WordReveal text="Full Stack" delay={0.4} />
-                <br />
-                <WordReveal text="Engineer —" delay={0.55} />
-                <br />
-                <WordReveal text="& Builder" delay={0.7} />
-              </h1>
-
-              {/* Two-col sub info */}
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.1, duration: 0.6 }}
-                style={{
-                  display: "flex",
-                  gap: "40px",
-                  marginBottom: "40px",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div style={{ flex: "0 0 auto" }}>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "12px",
-                      color: "var(--muted)",
-                      lineHeight: 1.9,
-                    }}
-                  >
-                    Muhammad Haseeb Tariq
-                    <br />
-                    Rawalpindi, Pakistan · 2026
-                  </p>
-                </div>
-                <div style={{ flex: "1 1 220px", maxWidth: "400px" }}>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: "15px",
-                      color: "var(--muted)",
-                      lineHeight: 1.75,
-                      fontWeight: 400,
-                    }}
-                  >
-                    I design and engineer scalable full-stack systems — from
-                    real-time WebSockets to complex relational databases.
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Divider + stats row */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.3, duration: 0.5 }}
-              >
-                <div
-                  style={{
-                    borderTop: "1px solid var(--border)",
-                    paddingTop: "24px",
-                    display: "flex",
-                    gap: "24px",
-                    alignItems: "center",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "11px",
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: "var(--muted)",
-                    }}
-                  >
-                    2 Live Projects
-                  </span>
-                  <span style={{ color: "var(--border)", fontSize: "18px" }}>
-                    |
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "11px",
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: "var(--accent)",
-                    }}
-                  >
-                    Open to Work
-                  </span>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* RIGHT — Profile image, editorial masked style */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.6,
-                duration: 0.9,
-                ease: [0.33, 1, 0.68, 1],
-              }}
-              style={{
-                flex: "0 0 auto",
-                width: "clamp(220px, 28vw, 380px)",
-                aspectRatio: "3/4",
-                position: "relative",
-              }}
-              className="hero-img-wrap"
+          {/* Desktop Nav Links */}
+          <div className="hidden md:flex items-center space-x-9 text-xs font-semibold tracking-wider uppercase text-slate-400">
+            <a
+              href="#about"
+              className="hover:text-emerald-400 transition-colors"
             >
-              {/* Accent border accent top-left corner */}
-              <motion.div
-                initial={{ scaleY: 0 }}
-                animate={{ scaleY: 1 }}
-                transition={{
-                  delay: 1.0,
-                  duration: 0.6,
-                  ease: [0.33, 1, 0.68, 1],
-                }}
-                style={{
-                  position: "absolute",
-                  top: "-12px",
-                  left: "-12px",
-                  width: "2px",
-                  height: "60px",
-                  background: "var(--accent)",
-                  transformOrigin: "top",
-                  zIndex: 2,
-                }}
-              />
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{
-                  delay: 1.1,
-                  duration: 0.5,
-                  ease: [0.33, 1, 0.68, 1],
-                }}
-                style={{
-                  position: "absolute",
-                  top: "-12px",
-                  left: "-12px",
-                  width: "60px",
-                  height: "2px",
-                  background: "var(--accent)",
-                  transformOrigin: "left",
-                  zIndex: 2,
-                }}
-              />
-              {/* Accent corner bottom-right */}
-              <motion.div
-                initial={{ scaleY: 0 }}
-                animate={{ scaleY: 1 }}
-                transition={{
-                  delay: 1.0,
-                  duration: 0.6,
-                  ease: [0.33, 1, 0.68, 1],
-                }}
-                style={{
-                  position: "absolute",
-                  bottom: "-12px",
-                  right: "-12px",
-                  width: "2px",
-                  height: "60px",
-                  background: "var(--accent)",
-                  transformOrigin: "bottom",
-                  zIndex: 2,
-                }}
-              />
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{
-                  delay: 1.1,
-                  duration: 0.5,
-                  ease: [0.33, 1, 0.68, 1],
-                }}
-                style={{
-                  position: "absolute",
-                  bottom: "-12px",
-                  right: "-12px",
-                  width: "60px",
-                  height: "2px",
-                  background: "var(--accent)",
-                  transformOrigin: "right",
-                  zIndex: 2,
-                }}
-              />
+              About
+            </a>
+            <a
+              href="#projects"
+              className="hover:text-emerald-400 transition-colors"
+            >
+              Work
+            </a>
+            <a
+              href="#experience"
+              className="hover:text-emerald-400 transition-colors"
+            >
+              Experience
+            </a>
+            <a
+              href="#contact"
+              className="hover:text-emerald-400 transition-colors"
+            >
+              Contact
+            </a>
+          </div>
 
-              {/* Image container */}
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  overflow: "hidden",
-                  borderRadius: "4px",
-                  position: "relative",
-                }}
+          <div className="hidden md:flex items-center">
+            <a
+              href="mailto:mht34579@gmail.com"
+              className="border border-emerald-500/30 text-emerald-400 hover:text-[#08080C] hover:bg-emerald-500 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300"
+            >
+              Hire Me
+            </a>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Navigation Drawer */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="md:hidden border-b border-emerald-500/10 bg-[#08080C]/95 backdrop-blur-xl absolute top-full left-0 w-full overflow-hidden shadow-2xl"
+            >
+              <div className="px-6 py-8 flex flex-col space-y-5 text-base font-bold text-slate-200">
+                <a
+                  href="#about"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="hover:text-emerald-400 py-2 border-b border-white/5 transition-colors"
+                >
+                  About
+                </a>
+                <a
+                  href="#projects"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="hover:text-emerald-400 py-2 border-b border-white/5 transition-colors"
+                >
+                  Work
+                </a>
+                <a
+                  href="#experience"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="hover:text-emerald-400 py-2 border-b border-white/5 transition-colors"
+                >
+                  Experience
+                </a>
+                <a
+                  href="#contact"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="hover:text-emerald-400 py-2 border-b border-white/5 transition-colors"
+                >
+                  Contact
+                </a>
+                <a
+                  href="mailto:mht34579@gmail.com"
+                  className="bg-emerald-500 text-slate-950 py-3.5 rounded-xl text-center font-bold hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/10"
+                >
+                  Hire Me
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
+
+      {/* Video Background */}
+
+      <ParticleBackground />
+      {/* Glow overlays on top of video */}
+      <div className="fixed top-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-[-5%] left-[-5%] w-[45%] h-[45%] bg-emerald-500/5 rounded-full blur-[140px]"></div>
+        <div className="absolute top-[20%] right-[-10%] w-[55%] h-[55%] bg-violet-500/5 rounded-full blur-[160px]"></div>
+        <div className="absolute bottom-[20%] left-[-10%] w-[45%] h-[45%] bg-emerald-500/5 rounded-full blur-[140px]"></div>
+      </div>
+
+      <main className="w-full px-8 md:px-16 xl:px-24 pb-20 relative">
+        {/* ── HERO SECTION ── */}
+        <section
+          id="about"
+          className="pt-28 md:pt-28 lg:pt-28 pb-16 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 lg:gap-16"
+        >
+          {/* Left: Text */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+            className="w-full lg:w-7/12 flex flex-col justify-center text-left"
+          >
+            <motion.div
+              variants={fadeIn}
+              className="inline-flex items-center self-start space-x-2 bg-emerald-500/10 rounded-full px-4.5 py-2 border border-emerald-500/20 mb-8 shadow-[0_0_15px_rgba(16,185,129,0.05)]"
+            >
+              <Code2 className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold tracking-wider text-emerald-300 uppercase">
+                Available for Opportunities
+              </span>
+            </motion.div>
+
+            <motion.h1
+              variants={fadeIn}
+              className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold font-display tracking-tight text-white mb-6 leading-[1.08]"
+            >
+              Hi, I'm <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-indigo-400">
+                Muhammad Haseeb
+              </span>
+            </motion.h1>
+
+            <motion.p
+              variants={fadeIn}
+              className="text-base sm:text-lg text-slate-400 max-w-xl mb-10 leading-relaxed font-medium"
+            >
+              A passionate Software Engineer specializing in building scalable
+              full-stack applications. From real-time WebSockets to complex
+              relational databases, I turn ideas into highly functional,
+              beautifully designed realities.
+            </motion.p>
+
+            <motion.div
+              variants={fadeIn}
+              className="flex flex-wrap gap-5 items-center"
+            >
+              <a
+                href="#projects"
+                className="inline-flex items-center space-x-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 px-8 py-4 rounded-xl font-bold hover:opacity-95 hover:scale-102 transition-all shadow-lg shadow-emerald-500/20"
               >
-                {/* Reveal wipe overlay */}
-                <motion.div
-                  initial={{ scaleY: 1 }}
-                  animate={{ scaleY: 0 }}
-                  transition={{
-                    delay: 0.7,
-                    duration: 0.8,
-                    ease: [0.76, 0, 0.24, 1],
-                  }}
+                <span>View My Work</span>
+                <ChevronRight className="w-5 h-5" />
+              </a>
+              <div className="flex items-center space-x-4">
+                <a
+                  href="https://github.com/Muhammad-haseebT"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all hover:scale-105"
+                  aria-label="GitHub"
+                >
+                  <FaGithub className="w-5 h-5" />
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/muhammad-haseb-tariq-17381b31a/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all hover:scale-105"
+                  aria-label="LinkedIn"
+                >
+                  <FaLinkedin className="w-5 h-5" />
+                </a>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Right: Profile Image */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="w-full lg:w-5/12 flex justify-center items-center"
+          >
+            <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 group">
+              {/* Neon ambient border glow */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500 to-indigo-500 rounded-[2.5rem] opacity-25 blur-2xl group-hover:opacity-40 transition-opacity duration-500"></div>
+              <div className="absolute inset-[-4px] bg-gradient-to-tr from-emerald-500 via-teal-400 to-violet-500 rounded-[2.5rem] opacity-20 group-hover:opacity-45 group-hover:scale-[1.03] transition-all duration-500 -z-10"></div>
+
+              <div className="relative w-full h-full rounded-[2.2rem] overflow-hidden border border-white/10 bg-[#0e0e14] shadow-2xl z-10 flex items-center justify-center transition-all duration-500 group-hover:scale-[1.02] group-hover:-rotate-1">
+                {/* Tech grid texture background */}
+                <div
+                  className="absolute inset-0 opacity-10"
                   style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "var(--bg)",
-                    transformOrigin: "top",
-                    zIndex: 3,
+                    backgroundImage:
+                      "radial-gradient(circle at 2px 2px, #10b981 1px, transparent 0)",
+                    backgroundSize: "24px 24px",
                   }}
-                />
+                ></div>
+
+                {/* Profile Image */}
                 <img
                   src="/profile.jpeg"
                   alt="Muhammad Haseeb Tariq"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    objectPosition: "center top",
-                    filter: "grayscale(15%) contrast(1.05)",
-                    display: "block",
-                  }}
+                  className="w-full h-full object-cover z-20 relative transition-transform duration-700 group-hover:scale-[1.08]"
                 />
-                {/* Subtle dark gradient at bottom */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: "40%",
-                    background:
-                      "linear-gradient(to top, rgba(8,8,8,0.55) 0%, transparent 100%)",
-                    pointerEvents: "none",
-                  }}
-                />
+
+                {/* Hover card */}
+                <div className="absolute bottom-5 left-5 right-5 bg-slate-950/85 backdrop-blur-md rounded-2xl p-4 border border-white/5 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-3 group-hover:translate-y-0 z-30 text-center shadow-2xl">
+                  <p className="text-sm font-extrabold text-white tracking-wide">
+                    Muhammad Haseeb Tariq
+                  </p>
+                  <p className="text-xs text-emerald-400 font-semibold mt-1">
+                    Full Stack Engineer
+                  </p>
+                </div>
               </div>
+            </div>
+          </motion.div>
+        </section>
 
-              {/* Floating label bottom */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.5, duration: 0.5 }}
-                style={{
-                  position: "absolute",
-                  bottom: "16px",
-                  left: "16px",
-                  zIndex: 4,
-                }}
-              >
-                <p
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "10px",
-                    color: "rgba(240,237,232,0.5)",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Full Stack Engineer
-                </p>
-              </motion.div>
-            </motion.div>
-
-            {/* Scroll indicator */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.6, duration: 0.6 }}
-              style={{
-                position: "absolute",
-                bottom: "40px",
-                left: "40px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "10px",
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "9px",
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                  color: "var(--muted)",
-                }}
-              >
-                SCROLL
-              </span>
-              <div
-                style={{
-                  width: "1px",
-                  height: "40px",
-                  background: "rgba(90,90,90,0.3)",
-                  overflow: "hidden",
-                  position: "relative",
-                }}
-              >
-                <motion.div
-                  className="scroll-line-anim"
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "var(--accent)",
-                  }}
-                />
-              </div>
-            </motion.div>
-
-            <style>{`
-              @media (max-width: 768px) {
-                #about {
-                  flex-direction: column !important;
-                  align-items: flex-start !important;
-                  padding-top: 120px !important;
-                }
-                .hero-img-wrap {
-                  width: 100% !important;
-                  max-width: 280px !important;
-                  aspect-ratio: 4/5 !important;
-                  align-self: center;
-                }
-              }
-            `}</style>
-          </section>
-
-          {/* ── MARQUEE ──────────────────────────────────────────────── */}
-          <MarqueeStrip />
-
-          {/* ── PROJECTS ─────────────────────────────────────────────── */}
-          <section
-            id="projects"
-            style={{
-              padding: "140px 40px",
-              maxWidth: "1200px",
-              margin: "0 auto",
-            }}
+        {/* ── PROJECTS ── */}
+        <section id="projects" className="py-28 border-t border-white/5">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeIn}
+            className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-6"
           >
-            <span style={sectionLabel}>01 — Selected Work</span>
-
             <div>
-              {/* Header row */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "24px",
-                  paddingBottom: "16px",
-                  borderBottom: "1px solid var(--border)",
-                  marginBottom: "0",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "10px",
-                    color: "var(--muted)",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    minWidth: "28px",
-                  }}
-                >
-                  #
-                </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "10px",
-                    color: "var(--muted)",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    flex: 1,
-                  }}
-                >
-                  Project
-                </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "10px",
-                    color: "var(--muted)",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                  }}
-                  className="hide-mobile"
-                >
-                  Category
-                </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "10px",
-                    color: "var(--muted)",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    minWidth: "36px",
-                    textAlign: "right",
-                  }}
-                >
-                  Year
-                </span>
-                <span style={{ width: "18px" }} />
-              </div>
-
-              {projects.map((p, i) => (
-                <ProjectRow key={p.index} project={p} rowIndex={i} />
-              ))}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-display text-white mb-4">
+                Featured Projects
+              </h2>
+              <p className="text-slate-400 text-base sm:text-lg max-w-xl leading-relaxed">
+                A highly refined selection of complex, production-ready software
+                systems I have designed and engineered.
+              </p>
             </div>
+          </motion.div>
 
-            <style>{`
-              @media (max-width: 640px) {
-                .hide-mobile { display: none !important; }
-              }
-            `}</style>
-          </section>
-
-          {/* ── EXPERIENCE / ABOUT ───────────────────────────────────── */}
-          <section
-            id="experience"
-            style={{
-              padding: "140px 40px",
-              maxWidth: "1200px",
-              margin: "0 auto",
-              borderTop: "1px solid var(--border)",
-            }}
-          >
-            <span style={sectionLabel}>02 — Background</span>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "80px",
-                flexWrap: "wrap",
-              }}
-            >
-              {/* Left col */}
-              <div style={{ flex: "0 0 auto", width: "min(100%, 380px)" }}>
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "15px",
-                    color: "var(--muted)",
-                    lineHeight: 1.8,
-                    marginBottom: "48px",
-                  }}
-                >
-                  I'm a Software Engineering student with a passion for building
-                  production-ready systems — from enterprise desktop tools to
-                  real-time web platforms. I care deeply about clean
-                  architecture, meaningful interfaces, and shipping things that
-                  actually work.
-                </motion.p>
-
-                {/* Education */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                >
-                  <p
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "10px",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: "var(--muted)",
-                      marginBottom: "14px",
-                    }}
-                  >
-                    Education
-                  </p>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "13px",
-                      color: "var(--text)",
-                      lineHeight: 1.9,
-                    }}
-                  >
-                    BSSE — Bachelor of Software Engineering
-                    <br />
-                    <span style={{ color: "var(--muted)" }}>
-                      BIIT — Barani Institute of Information Technology
-                      <br />
-                      2022 → 2026
-                    </span>
-                  </p>
-                </motion.div>
-              </div>
-
-              {/* Right col — Skills */}
-              <div style={{ flex: "1 1 300px" }}>
-                <div style={{ overflow: "hidden", marginBottom: "48px" }}>
-                  <motion.h2
-                    initial={{ y: "105%" }}
-                    whileInView={{ y: "0%" }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 800,
-                      fontSize: "clamp(28px, 3.5vw, 42px)",
-                      color: "var(--text)",
-                      letterSpacing: "-0.02em",
-                    }}
-                  >
-                    Technical Arsenal
-                  </motion.h2>
-                </div>
-
+          {/* Top 3 cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+            {projects.slice(0, 3).map((project, idx) => (
+              <motion.div
+                key={idx}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+                variants={{
+                  hidden: { opacity: 0, y: 35 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { delay: idx * 0.05, duration: 0.6 },
+                  },
+                }}
+                className="glass-card rounded-[1.8rem] overflow-hidden group flex flex-col glass-card-hover border-2 border-emerald-500/50 bg-[#09090D]/80 hover:border-emerald-500 shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300"
+              >
+                {/* Brand Visual */}
                 <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "40px",
-                  }}
+                  className={`h-52 sm:h-56 w-full relative overflow-hidden bg-gradient-to-br ${project.gradient} ${project.fullLogo ? "p-0" : "p-8"} flex items-center justify-center border-b border-white/5`}
                 >
-                  {skillGroups.map((group, gi) => (
-                    <motion.div
-                      key={group.name}
-                      initial={{ opacity: 0, y: 12 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: gi * 0.1 }}
-                    >
-                      <p
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: "10px",
-                          letterSpacing: "0.12em",
-                          textTransform: "uppercase",
-                          color: "var(--muted)",
-                          marginBottom: "16px",
-                        }}
-                      >
-                        {group.name}
-                      </p>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "8px",
-                        }}
-                      >
-                        {group.skills.map((skill, si) => (
-                          <SkillTag
-                            key={skill}
-                            skill={skill}
-                            index={gi * 10 + si}
-                          />
-                        ))}
-                      </div>
-                    </motion.div>
-                  ))}
+                  <div className="flex space-x-1.5 absolute top-4 left-4 z-20 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] border border-black/10"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] border border-black/10"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#27C93F] border border-black/10"></span>
+                  </div>
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500"></div>
+                  {project.fullLogo ? (
+                    <>
+                      <div className="absolute inset-0 backdrop-blur-xl bg-white/5 z-0"></div>
+                      <img
+                        src={project.fullLogo}
+                        alt={project.title}
+                        className="w-full h-full object-contain p-8 z-10 group-hover:scale-[1.03] transition-transform duration-500"
+                      />
+                    </>
+                  ) : (
+                    <div className="w-18 h-18 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-500 border border-white/15 z-10">
+                      {project.icon}
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-          </section>
 
-          {/* ── CONTACT ──────────────────────────────────────────────── */}
-          <section
-            id="contact"
-            style={{
-              padding: "140px 40px 160px",
-              maxWidth: "1200px",
-              margin: "0 auto",
-              borderTop: "1px solid var(--border)",
-              textAlign: "center",
-            }}
-          >
-            <span
-              style={{ ...sectionLabel, textAlign: "center", display: "block" }}
-            >
-              03 — Contact
-            </span>
+                {/* Info */}
+                <div className="p-7 flex flex-col flex-grow justify-between">
+                  <div>
+                    <span className="text-[10px] font-extrabold text-emerald-400/90 tracking-widest uppercase mb-2 block">
+                      {project.category}
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-bold font-display text-white mb-3 group-hover:text-emerald-400 transition-colors">
+                      {project.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-400 mb-6 leading-relaxed font-medium min-h-[70px]">
+                      {project.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-7">
+                      {project.tech.map((t, i) => (
+                        <span
+                          key={i}
+                          className="text-[10px] font-bold bg-[#1a2e26]/30 text-emerald-400/90 px-2.5 py-1.5 rounded-lg border border-emerald-500/10 hover:bg-[#1a2e26]/50 transition-colors"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
 
-            <div style={{ overflow: "hidden", marginBottom: "64px" }}>
-              <motion.h2
-                initial={{ y: "105%" }}
-                whileInView={{ y: "0%" }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 800,
-                  fontSize: "clamp(40px, 5vw, 72px)",
-                  color: "var(--text)",
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1.1,
-                }}
-              >
-                Let's work
-                <br />
-                together.
-              </motion.h2>
-            </div>
+                  <div className="flex items-center gap-3.5 mt-auto">
+                    {project.liveLink && (
+                      <a
+                        href={project.liveLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`text-center bg-emerald-500 text-[#08080C] px-4 py-3.5 rounded-xl font-bold text-xs hover:bg-emerald-400 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/10 ${idx === 0 ? "w-full" : "flex-1"}`}
+                      >
+                        Live Site
+                      </a>
+                    )}
+                    {project.link && idx !== 0 && (
+                      <a
+                        href={project.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 flex items-center justify-center space-x-2 bg-[#12121A] text-slate-200 px-4 py-3.5 rounded-xl font-bold text-xs hover:bg-[#1A1A26] border border-white/5 hover:border-emerald-500/20 active:scale-95 transition-all"
+                      >
+                        <FaGithub className="w-4 h-4" />
+                        <span>{project.liveLink ? "Code" : "Repository"}</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              style={{
-                display: "flex",
-                gap: "16px",
-                justifyContent: "center",
-                flexWrap: "wrap",
-                marginBottom: "40px",
-              }}
-            >
-              {[
-                {
-                  href: "mailto:mht34579@gmail.com",
-                  label: "mht34579@gmail.com",
-                  icon: <Mail size={14} />,
-                },
-                {
-                  href: "https://www.linkedin.com/in/muhammad-haseb-tariq-17381b31a/",
-                  label: "LinkedIn ↗",
-                  icon: <FaLinkedin size={14} />,
-                },
-              ].map((btn) => (
-                <motion.a
-                  key={btn.label}
-                  href={btn.href}
-                  target={btn.href.startsWith("mailto") ? undefined : "_blank"}
-                  rel="noreferrer"
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "13px",
-                    color: "var(--text)",
-                    border: "1px solid var(--border)",
-                    padding: "14px 28px",
-                    borderRadius: "999px",
-                    textDecoration: "none",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    transition:
-                      "border-color 0.3s, background 0.3s, color 0.3s",
+          {/* Secondary projects */}
+          <div className="mt-20">
+            <h3 className="text-lg font-bold uppercase tracking-wider text-slate-400 mb-8 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-emerald-500/50 rounded-full"></span>
+              Other Technical Implementations
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.slice(3).map((project, idx) => (
+                <motion.div
+                  key={idx}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-50px" }}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { delay: idx * 0.05, duration: 0.5 },
+                    },
                   }}
-                  whileHover={{
-                    borderColor: "var(--accent)",
-                    background: "var(--accent)",
-                    color: "#080808",
-                  }}
+                  className="bg-white/[0.02] border border-emerald-500/15 rounded-2xl p-6 flex flex-col justify-between hover:border-emerald-500/45 hover:bg-white/[0.03] transition-all duration-300 group"
                 >
-                  {btn.icon}
-                  {btn.label}
-                </motion.a>
-              ))}
-            </motion.div>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "11px",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: "var(--muted)",
-              }}
-            >
-              Available for full-time roles & freelance projects
-            </motion.p>
-          </section>
-
-          {/* ── FOOTER ───────────────────────────────────────────────── */}
-          <footer
-            style={{
-              borderTop: "1px solid var(--border)",
-              padding: "32px 40px 0",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                maxWidth: "1200px",
-                margin: "0 auto",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingBottom: "32px",
-                flexWrap: "wrap",
-                gap: "16px",
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "11px",
-                  color: "var(--muted)",
-                }}
-              >
-                © 2026 Muhammad Haseeb Tariq
-              </span>
-              <div style={{ display: "flex", gap: "16px" }}>
-                {[
-                  {
-                    href: "https://github.com/Muhammad-haseebT",
-                    Icon: FaGithub,
-                    label: "GitHub",
-                  },
-                  {
-                    href: "https://www.linkedin.com/in/muhammad-haseb-tariq-17381b31a/",
-                    Icon: FaLinkedin,
-                    label: "LinkedIn",
-                  },
-                ].map(({ href, Icon, label }) => (
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-[9px] font-extrabold text-slate-500 tracking-wider uppercase">
+                        {project.category}
+                      </span>
+                      <div className="text-slate-500 group-hover:text-emerald-400/80 transition-colors">
+                        {project.icon}
+                      </div>
+                    </div>
+                    <h4 className="text-base sm:text-lg font-bold font-display text-white mb-2.5 group-hover:text-emerald-400 transition-colors">
+                      {project.title}
+                    </h4>
+                    <p className="text-xs text-slate-400 mb-6 leading-relaxed font-medium min-h-[48px]">
+                      {project.description}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mb-6">
+                      {project.tech.map((t, i) => (
+                        <span
+                          key={i}
+                          className="text-[9px] font-semibold bg-white/5 text-slate-300 px-2 py-1 rounded"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                   <a
-                    key={label}
-                    href={href}
+                    href={project.link}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={label}
-                    style={{
-                      color: "var(--muted)",
-                      transition: "color 0.2s",
-                      display: "flex",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.color = "var(--text)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.color = "var(--muted)")
-                    }
+                    className="w-full flex items-center justify-center space-x-2 bg-[#12121A] hover:bg-[#1A1A26] border border-white/5 hover:border-emerald-500/20 text-slate-300 hover:text-white py-2.5 rounded-xl font-bold text-xs transition-all"
                   >
-                    <Icon size={16} />
+                    <FaGithub className="w-3.5 h-3.5" />
+                    <span>View Repository</span>
                   </a>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── EXPERIENCE & SKILLS ── */}
+        <section id="experience" className="py-28 border-t border-white/5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+            {/* Education */}
+            <div>
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={fadeIn}
+                className="mb-14"
+              >
+                <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-white mb-4">
+                  My Journey
+                </h2>
+                <p className="text-slate-400 font-medium">
+                  My academic foundation and the path that shaped my skills.
+                </p>
+              </motion.div>
+
+              {/* Education Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -15 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="relative flex items-start pl-12"
+              >
+                {/* Timeline line + dot */}
+                <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-emerald-500/80 via-teal-500/40 to-transparent"></div>
+                <div className="absolute left-[-5px] top-6 w-3 h-3 rounded-full bg-[#08080C] border-2 border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+
+                <div className="p-6 rounded-2xl w-full border border-white/5 bg-[#0e0e14]/40 hover:border-emerald-500/20 transition-all duration-300">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <span className="text-emerald-400 font-bold text-xs tracking-wider uppercase bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/15">
+                      2022 — 2026
+                    </span>
+                    <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                      Education
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1 leading-snug">
+                    Bachelor of Software Engineering
+                  </h3>
+                  <h4 className="text-slate-400 text-sm font-semibold mb-4">
+                    BIIT — Barani Institute of Information Technology
+                  </h4>
+                  <p className="text-slate-400 leading-relaxed text-sm font-medium">
+                    Currently pursuing a BSSE degree with a strong focus on Web
+                    Development, Backend Architecture, Database Systems, and
+                    Software Engineering principles.
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Skills */}
+            <div>
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={fadeIn}
+                className="mb-14"
+              >
+                <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-white mb-4">
+                  Technical Arsenal
+                </h2>
+                <p className="text-slate-400 font-medium">
+                  Modern technologies, frameworks, and methodologies I master.
+                </p>
+              </motion.div>
+
+              <div className="space-y-9">
+                {skillCategories.map((cat, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 15 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="p-6 rounded-2xl border border-white/5 bg-[#0e0e14]/40"
+                  >
+                    <h3 className="text-base font-extrabold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                      {cat.title}
+                    </h3>
+                    <div className="flex flex-wrap gap-2.5">
+                      {cat.skills.map((skill, i) => (
+                        <div
+                          key={i}
+                          className="bg-white/5 border border-white/5 px-4 py-2.5 rounded-xl text-slate-300 text-xs sm:text-sm font-bold hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:text-emerald-300 transition-all duration-300 cursor-default"
+                        >
+                          {skill}
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* Giant decorative MHT */}
-            <div
-              style={{
-                textAlign: "center",
-                overflow: "hidden",
-                lineHeight: 0.85,
-              }}
+        {/* ── CONTACT ── */}
+        <section id="contact" className="py-28 border-t border-white/5">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="rounded-[2.5rem] p-10 md:p-20 text-center relative overflow-hidden bg-gradient-to-br from-[#0e0e14] to-[#08080C] border border-white/10 shadow-[0_20px_50px_-20px_rgba(16,185,129,0.05)]"
+          >
+            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-[90px] -z-10"></div>
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-violet-500/10 rounded-full blur-[90px] -z-10"></div>
+
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold font-display text-white mb-6 relative z-10 leading-tight tracking-tight">
+              Let's build something <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-indigo-400">
+                amazing together.
+              </span>
+            </h2>
+            <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto mb-12 relative z-10 leading-relaxed font-medium">
+              I'm always excited to tackle complex technical challenges,
+              collaborate on meaningful projects, or help scale systems. Drop me
+              a line, and let's start coding!
+            </p>
+            <a
+              href="mailto:mht34579@gmail.com"
+              className="inline-flex items-center justify-center space-x-2 bg-emerald-500 text-[#08080C] px-8 py-4 rounded-xl font-extrabold text-base sm:text-lg hover:bg-emerald-400 hover:scale-103 transition-all relative z-10 shadow-xl shadow-emerald-500/20"
             >
-              <motion.span
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 1.6, ease: "easeOut", delay: 0.5 }}
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 800,
-                  fontSize: "clamp(72px, 15vw, 220px)",
-                  color: "rgba(255,255,255,0.03)",
-                  letterSpacing: "-0.04em",
-                  display: "block",
-                  userSelect: "none",
-                  lineHeight: 0.88,
-                }}
-              >
-                MHT
-              </motion.span>
-            </div>
-          </footer>
-        </motion.div>
-      )}
-    </>
+              <Mail className="w-5 h-5" />
+              <span>Say Hello</span>
+            </a>
+          </motion.div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 bg-[#08080C] py-10 relative z-10">
+        <div className="w-full px-8 md:px-16 xl:px-24 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="text-slate-500 font-bold text-xs sm:text-sm tracking-wide text-center sm:text-left">
+            &copy; {new Date().getFullYear()} Muhammad Haseeb Tariq. All rights
+            reserved.
+          </div>
+          <div className="flex space-x-5">
+            <a
+              href="https://github.com/Muhammad-haseebT"
+              target="_blank"
+              rel="noreferrer"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/5 text-slate-500 hover:text-emerald-400 hover:border-emerald-500/20 transition-all"
+              aria-label="GitHub"
+            >
+              <FaGithub className="w-4 h-4" />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/muhammad-haseb-tariq-17381b31a/"
+              target="_blank"
+              rel="noreferrer"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/5 text-slate-500 hover:text-emerald-400 hover:border-emerald-500/20 transition-all"
+              aria-label="LinkedIn"
+            >
+              <FaLinkedin className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
+
+export default App;
