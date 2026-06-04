@@ -280,7 +280,7 @@ function App() {
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
-            className="w-full lg:w-7/12 flex flex-col justify-center text-left"
+            lassName="w-full lg:w-7/12 flex flex-col justify-center text-left relative z-10"
           >
             <motion.div
               variants={fadeIn}
@@ -426,7 +426,7 @@ function App() {
                     transition: { delay: idx * 0.05, duration: 0.6 },
                   },
                 }}
-                className="glass-card rounded-[1.8rem] overflow-hidden group flex flex-col glass-card-hover border-2 border-emerald-500/50 bg-[#09090D]/80 hover:border-emerald-500 shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300"
+                className="rounded-[1.8rem] overflow-hidden group flex flex-col border-2 border-emerald-500/50 bg-[#09090D] hover:border-emerald-500 shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300 relative z-10"
               >
                 {/* Brand Visual */}
                 <div
@@ -527,7 +527,7 @@ function App() {
                       transition: { delay: idx * 0.05, duration: 0.5 },
                     },
                   }}
-                  className="bg-white/[0.02] border border-emerald-500/15 rounded-2xl p-6 flex flex-col justify-between hover:border-emerald-500/45 hover:bg-white/[0.03] transition-all duration-300 group"
+                  className="bg-[#0e0e14] border border-emerald-500/15 rounded-2xl p-6 flex flex-col justify-between hover:border-emerald-500/45 hover:bg-[#12121f] transition-all duration-300 group relative z-10"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-4">
